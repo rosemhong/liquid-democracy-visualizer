@@ -18,17 +18,18 @@ def main():
 
     # create graph
     graph = Graph(model)
-    graph.delegate_voters()
-    votes = graph.get_votes()  # calculate weight of each node and then count up votes based on weights
-        # {candidate 0: weight0, candidate1: weight1}
+    results = graph.get_results() # Assign Delegates, Calculate "weight" of votes, Count up total votes
     total_voters = graph.model.total_voters
-    correct_votes = int(votes['1'])
+    correct_votes = int(results[1])
     accuracy = 1.0 * correct_votes / total_voters
-    print("ACCURACY: " + str(accuracy))
     print("correct votes: " + str(correct_votes))
     print("total votes: " + str(total_voters))
+    print("ACCURACY: " + str(accuracy))
+
     
     # visualizing graph
+    # vis = Visualization(graph)
+    # vis.show()
 
 
 

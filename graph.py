@@ -1,73 +1,15 @@
 import numpy as np
 import random
 from model import Model
-
-class Node:
-    def __init__(self, name, model):
-        self.name = name
-        self.model = model
-        
-        self.edges = []  # social network
-        self.weight = 1  # strength of vote
-        self.delegate = None  # which node this node has delegated to
-        self.eligible_delegates = []  # possible nodes this node can delegate to
-        self.followers = []  # nodes who have delegated to this node
-
-        # parameters:
-        self.threshold = self.model.threshold_diff  # how much more competent another voter needs to be
-        self.competence = self.sample_competence()  # drawn IID from N(mean, SD)
-        self.vote = self.sample_vote()  # candidate that voter prefers
-
-    def sample_competence(self):
-        # return between 0 and 1 inclusive
-        mean = self.model.competence_mean
-        sd = self.model.competence_sd
-        c = np.random.normal(mean, sd)
-        if c > 1:
-            c = 1
-        elif c < 0:
-            c = 0
-
-        return c 
-    
-    def sample_vote(self):
-        if self.competence > 0.5:
-            v = 1  # correct candidate
-        else:
-            v = 0  # incorrect candidate
-
-        return v
-    
-    def find_eligible_delegates(self):
-        '''
-        fills out self.eligible_delegates
-        wildcards: error when determining who is a potential delegate
-            (ie 0.8 * delegate competency)
-        '''
-        pass
-    
-    def delegate(self):
-        '''
-        delegate vote based on self.eligible_delegates and any delegation rules
-        rules could be: pick randomly, pick most competent
-
-        if self.eligible_delegates is empty, make weight 0
-        '''
-        pass
-    
-    def vote(self):
-        '''
-        vote for whoever u like most, if your vote was delegated, your weight is 0
-        '''
-        # return (v, weight)
-        pass
+from node import Node
 
 
 class Graph:
     def __init__(self, model):
         self.model = model
         self.nodes = self.generate_nodes()
-        self.adjacency_matrix = self.generate_graph()
+        self.adj_matrix = self.generate_graph()
+        self.all_paths = None
 
     def generate_nodes(self):
         nodes = []
@@ -87,32 +29,108 @@ class Graph:
     def generate_graph(self):
         '''
         Generates Erdos-Renyi random graph.
+        TODO: generate preferential attachment graph
         '''
         nodes = self.nodes
         connect_probability = self.model.connect_probability
-        adjacency_matrix = [[None * len(nodes)] * len(nodes)]
+        adj_matrix = [[-1 for _ in range(len(nodes))] for _ in range(len(nodes))]
         for i in range(len(nodes)):
             for j in range(len(nodes)):
                 if i == j:
-                    adjacency_matrix[i][j] = 0
-                if adjacency_matrix[j][i] is not None:  # undirected
-                    adjacency_matrix[i][j] = adjacency_matrix[j][i]
+                    adj_matrix[i][j] = 0
+                if adj_matrix[j][i] != -1:  # undirected
+                    adj_matrix[i][j] = adj_matrix[j][i]
                     self.nodes[i].edges.append(self.nodes[j])
                 else:
-                    adjacency_matrix[i][j] = self._flip_coin(connect_probability)
+                    adj_matrix[i][j] = self._flip_coin(connect_probability)
                     self.nodes[i].edges.append(self.nodes[j])
 
-        return adjacency_matrix
+        return adj_matrix
 
-    def delegate_voters(self):
+    def _assign_delegates(self):
         for node in self.nodes:
-            node.delegate()
+            node.assign_delegate()
 
-    def get_votes(self):
+    def _check_visited(self, visited, node):
+        for visited_node, _ in visited:
+            if node == visited_node:
+                return True
+        return False
+
+    def _run_bfs(self, adj_matrix, root):
+        visited = [(root, 0)]
+        queue = [(root, 0)]
+        while queue:
+            popped_node, dist = queue.pop(0)
+            for node in self.nodes:
+                if adj_matrix[popped_node.name][node.name] == 1 and not self._check_visited(visited, node):
+                    visited.append((node, dist + 1))
+                    queue.append((node, dist + 1))
+        return visited
+
+    def _print_nodes(self):
+        print('Nodes:')
+        for node in self.nodes:
+            print(node)
+
+    def _print_all_paths(self):
+        print('All paths:')
+        i = 1
+        for path in self.all_paths:
+            print('Path ' + str(i) + ':')
+            for node, dist in path:
+                print(f"{node}, dist from root: {dist}")
+            i += 1
+
+    def get_raw_results(self):
+        results = {0: 0, 1: 0}
+        for node in self.nodes:
+            candidate = node.vote
+            results[candidate] += 1
+        return results
+
+    def get_results(self):
         '''
         Return the results of the election, i.e. the number of votes
         each candidate received.
         '''
-        # find sinks (nodes without a delegate)
-        # bfs from sinks and count up
-        pass
+        nodes = self.nodes
+        self._assign_delegates()
+
+        # construct reverse graph of who points to who; also find sources of the reverse graph (nodes that don't delegate their vote)
+        rev_delegate_adj_matrix = [[0 for _ in range(len(nodes))] for _ in range(len(nodes))]
+        # print('INITIAL')
+        # print(rev_delegate_adj_matrix)
+        sources = []
+        for node in self.nodes:
+            if node.delegate is not None:
+                i = node.name
+                j = node.delegate.name
+                # print(f"edge {j},{i}")
+                rev_delegate_adj_matrix[j][i] = 1
+                # print(rev_delegate_adj_matrix)
+            else:
+                sources.append(node)
+
+        # print('REV DELEGATE ADJ MATRIX')
+        # print(rev_delegate_adj_matrix)
+
+        # print('SOURCES')
+        # for source in sources:
+        #     print(source)
+
+        # BFS from sources
+        self.all_paths = []
+        for root in sources:
+            self.all_paths.append(self._run_bfs(rev_delegate_adj_matrix, root))
+
+        self._print_nodes()
+        self._print_all_paths()
+
+        # tally votes
+        results = {0: 0, 1: 0}
+        for path in self.all_paths:
+            num_votes = len(path)
+            candidate = path[0][0].vote  # all votes in this path go towards `candidate`
+            results[candidate] += num_votes
+        return results
