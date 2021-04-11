@@ -2,6 +2,12 @@ import numpy as np
 import random
 from model import Model
 from node import Node
+from enum import Enum
+
+
+class GraphType(Enum):
+    ERDOS_RENYI = 1
+    PREFERENTIAL_ATTACHMENT = 2
 
 
 class Graph:
@@ -26,11 +32,22 @@ class Graph:
         '''
         return 1 if random.random() < p else 0
 
-    def generate_graph(self):
+    def generate_graph(self, graph_type = GraphType.ERDOS_RENYI):
         '''
         Generates Erdos-Renyi random graph.
         TODO: generate preferential attachment graph
         '''
+        if graph_type == GraphType.ERDOS_RENYI:
+            adj_matrix = self._generate_erdos_renyi_graph()
+        elif graph_type == GraphType.PREFERENTIAL_ATTACHMENT:
+            num_nodes = len(self.nodes)
+            adj_matrix = self._generate_preferential_attachment_graph(5*num_nodes, num_nodes)
+        else:
+            raise NotImplemented()
+
+        return adj_matrix
+
+    def _generate_erdos_renyi_graph(self):
         nodes = self.nodes
         connect_probability = self.model.connect_probability
         adj_matrix = [[-1 for _ in range(len(nodes))] for _ in range(len(nodes))]
@@ -40,12 +57,44 @@ class Graph:
                     adj_matrix[i][j] = 0
                 if adj_matrix[j][i] != -1:  # undirected
                     adj_matrix[i][j] = adj_matrix[j][i]
-                    self.nodes[i].edges.append(self.nodes[j])
+                    if adj_matrix[i][j] == 1:
+                        self.nodes[i].edges.append(self.nodes[j])
                 else:
                     adj_matrix[i][j] = self._flip_coin(connect_probability)
-                    self.nodes[i].edges.append(self.nodes[j])
+                    if adj_matrix[i][j] == 1:
+                        self.nodes[i].edges.append(self.nodes[j])
 
         return adj_matrix
+
+    def _random_subset_with_weights(self, weights, m):
+        mapped_weights = [
+            (random.expovariate(w), i)
+            for i, w in enumerate(weights)
+        ]
+        return { i for _, i in sorted(mapped_weights)[:m] }
+
+    def _generate_preferential_attachment_graph(self, n, m):
+        # using barabasi-albert model
+        # https://stackoverflow.com/questions/59003405/barab%C3%A1si-albert-model-in-python
+        
+        # initialise with a complete graph on m vertices
+        neighbours = [ set(range(m)) - {i} for i in range(m) ]
+        degrees = [ m-1 for i in range(m) ]
+
+        for i in range(m, n):
+            n_neighbours = self._random_subset_with_weights(degrees, m)
+
+            # add node with back-edges
+            neighbours.append(n_neighbours)
+            degrees.append(m)
+
+            # add forward-edges
+            for j in n_neighbours:
+                neighbours[j].add(i)
+                degrees[j] += 1
+
+        # turn in this into adj matrix
+        return neighbours
 
     def _assign_delegates(self):
         for node in self.nodes:
@@ -68,6 +117,13 @@ class Graph:
                     queue.append((node, dist + 1))
         return visited
 
+    def get_raw_results(self):
+        results = {0: 0, 1: 0}
+        for node in self.nodes:
+            candidate = node.vote
+            results[candidate] += 1
+        return results
+
     def _print_nodes(self):
         print('Nodes:')
         for node in self.nodes:
@@ -82,33 +138,17 @@ class Graph:
                 print(f"{node}, dist from root: {dist}")
             i += 1
 
-    def get_raw_results(self):
-        results = {0: 0, 1: 0}
-        for node in self.nodes:
-            candidate = node.vote
-            results[candidate] += 1
-        return results
-
-    def get_results(self):
-        '''
-        Return the results of the election, i.e. the number of votes
-        each candidate received.
-        '''
+    def _construct_all_paths(self):
         nodes = self.nodes
-        self._assign_delegates()
 
         # construct reverse graph of who points to who; also find sources of the reverse graph (nodes that don't delegate their vote)
         rev_delegate_adj_matrix = [[0 for _ in range(len(nodes))] for _ in range(len(nodes))]
-        # print('INITIAL')
-        # print(rev_delegate_adj_matrix)
         sources = []
-        for node in self.nodes:
+        for node in nodes:
             if node.delegate is not None:
                 i = node.name
                 j = node.delegate.name
-                # print(f"edge {j},{i}")
                 rev_delegate_adj_matrix[j][i] = 1
-                # print(rev_delegate_adj_matrix)
             else:
                 sources.append(node)
 
@@ -124,8 +164,35 @@ class Graph:
         for root in sources:
             self.all_paths.append(self._run_bfs(rev_delegate_adj_matrix, root))
 
-        self._print_nodes()
-        self._print_all_paths()
+        # self._print_nodes()
+        # self._print_all_paths()
+
+    def _satisfies_delegation_degree(self):
+        '''
+        If any node's distance from their final delegate exceeds their delegation degree,
+        change their delegate to None and return False; otherwise, return True. Note that
+        nodes are examined starting at the root of each path in self.all_paths.
+        '''
+        all_paths = self.all_paths.copy()
+        for path in all_paths:
+            if len(path) > 1:
+                for i in range(1, len(path)):
+                    if path[i][1] > path[i][0].delegation_degree:
+                        path[i][0].delegate = None
+                        return False
+        return True
+
+    def get_results(self):
+        '''
+        Return the results of the election, i.e. the number of votes
+        each candidate received.
+        '''
+        self._assign_delegates()
+
+        self._construct_all_paths()
+
+        while not self._satisfies_delegation_degree():
+            self._construct_all_paths()
 
         # tally votes
         results = {0: 0, 1: 0}

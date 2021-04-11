@@ -19,8 +19,12 @@ class Node:
         self.delegate = None  # which node this node has delegated to
         self.eligible_delegates = []  # possible nodes this node can delegate to
         self.delegate_probability = self.model.delegate_probability
-        self.followers = []  # nodes who have delegated to this node
-        self.final_vote = None # if they delegated, what the final delegate votes
+        self.delegation_degree = self.model.delegation_degree
+        # self.followers = []  # nodes who have delegated to this node
+        # self.final_vote = None # if they delegated, what the final delegate votes
+
+        self.weight_limit = model.weight_limit
+        self.num_followers = 0
 
         # parameters:
         self.threshold = self.model.threshold_diff  # how much more competent another voter needs to be
@@ -62,7 +66,8 @@ class Node:
         
         for neighbor in self.edges:
             if neighbor.competence * prob > self.competence + self.threshold:
-                self.eligible_delegates.append(neighbor)
+                if neighbor.num_followers < neighbor.weight_limit:
+                    self.eligible_delegates.append(neighbor)
 
     def assign_delegate(self, rule=DelegateRule.MOST_COMPETENT):
         '''
@@ -92,6 +97,8 @@ class Node:
         
         if chosen:
             self.delegate = chosen
+            chosen.num_followers += 1
+
             # d.followers.append(self) # may get rid of or move to graph function
         else:
             self.delegate = None
