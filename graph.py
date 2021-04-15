@@ -14,7 +14,7 @@ class Graph:
     def __init__(self, model):
         self.model = model
         self.nodes = self.generate_nodes()
-        self.adj_matrix = self.generate_graph()
+        self.adj_matrix = self.generate_graph(graph_type=GraphType(model.graph_type))
         self.all_paths = None
 
     def generate_nodes(self):
@@ -32,7 +32,7 @@ class Graph:
         '''
         return 1 if random.random() < p else 0
 
-    def generate_graph(self, graph_type = GraphType.ERDOS_RENYI):
+    def generate_graph(self, graph_type=GraphType.PREFERENTIAL_ATTACHMENT):
         '''
         Generates Erdos-Renyi random graph.
         TODO: generate preferential attachment graph
@@ -41,7 +41,7 @@ class Graph:
             adj_matrix = self._generate_erdos_renyi_graph()
         elif graph_type == GraphType.PREFERENTIAL_ATTACHMENT:
             num_nodes = len(self.nodes)
-            adj_matrix = self._generate_preferential_attachment_graph(5*num_nodes, num_nodes)
+            adj_matrix = self._generate_preferential_attachment_graph(num_nodes, int(num_nodes//5))
         else:
             raise NotImplemented()
 
@@ -76,25 +76,37 @@ class Graph:
     def _generate_preferential_attachment_graph(self, n, m):
         # using barabasi-albert model
         # https://stackoverflow.com/questions/59003405/barab%C3%A1si-albert-model-in-python
-        
+        # n = number of nodes in final graph
+        # m = initial number of nodes that are fully connected / 'popular'
+
+
         # initialise with a complete graph on m vertices
-        neighbours = [ set(range(m)) - {i} for i in range(m) ]
+        neighbors = [ set(range(m)) - {i} for i in range(m) ]
         degrees = [ m-1 for i in range(m) ]
 
         for i in range(m, n):
-            n_neighbours = self._random_subset_with_weights(degrees, m)
+            n_neighbors = self._random_subset_with_weights(degrees, m)
 
             # add node with back-edges
-            neighbours.append(n_neighbours)
+            neighbors.append(n_neighbors)
             degrees.append(m)
 
             # add forward-edges
-            for j in n_neighbours:
-                neighbours[j].add(i)
+            for j in n_neighbors:
+                neighbors[j].add(i)
                 degrees[j] += 1
 
         # turn in this into adj matrix
-        return neighbours
+        for line in neighbors:
+            print(line)
+
+        adj_matrix = [[0 for _ in range(n)] for _ in range(n)]
+        for i in range(len(neighbors)):
+            for neighbor in neighbors[i]:
+                adj_matrix[i][neighbor] = 1
+                self.nodes[i].edges.append(self.nodes[neighbor])
+
+        return adj_matrix
 
     def _assign_delegates(self):
         for node in self.nodes:
@@ -164,8 +176,8 @@ class Graph:
         for root in sources:
             self.all_paths.append(self._run_bfs(rev_delegate_adj_matrix, root))
 
-        # self._print_nodes()
-        # self._print_all_paths()
+        self._print_nodes()
+        self._print_all_paths()
 
     def _satisfies_delegation_degree(self):
         '''
@@ -190,7 +202,6 @@ class Graph:
         self._assign_delegates()
 
         self._construct_all_paths()
-
         while not self._satisfies_delegation_degree():
             self._construct_all_paths()
 

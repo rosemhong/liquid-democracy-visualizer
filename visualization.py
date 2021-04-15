@@ -57,18 +57,18 @@ class Visualization:
 
 
 # testing:
-model = Model({
-    'total_voters': 25,
-    'competence_mean': 0.5,
-    'competence_sd': 0.2,
-    'connect_probability': 0.3,
-    'delegate_probability': 0,
-    'threshold_diff': 0.1,
-    'weight_limit': 0,
-    'delegation_degrees': 0
-})
+# model = Model({
+#     'total_voters': 25,
+#     'competence_mean': 0.5,
+#     'competence_sd': 0.2,
+#     'connect_probability': 0.3,
+#     'delegate_probability': 0,
+#     'threshold_diff': 0.1,
+#     'weight_limit': 0,
+#     'delegation_degrees': 0
+# })
 
-graph = Graph(model)
-results = graph.get_results()
-v = Visualization(graph)
-v.show()
+# graph = Graph(model)
+# results = graph.get_results()
+# v = Visualization(graph)
+# v.show()

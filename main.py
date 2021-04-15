@@ -6,7 +6,7 @@ from graph import Graph
 from visualization import Visualization
 
 CONFIG = 'config.ini'
-NUM_TRIALS = 5
+NUM_TRIALS = 1
 
 '''
 TODO:
@@ -14,7 +14,8 @@ for the next time we meet (after 4/11):
 - test the functions we each wrote last time!
 
 easy
-- compare to if no one delegates (tally up direct democracy vote) - this is done in get_raw_results, just print it out in main at some point
+- compare to if no one delegates (tally up direct democracy vote)
+    - this is done in get_raw_results, just print it out in main at some point
 - print parameters in main
 
 medium
@@ -22,6 +23,7 @@ medium
     - keep track of capacity
     - in find_eligible_delegates, if neighbor at capacity (goin in order), skip them
 - preferential attachment graph (from Ariel's suggestion) - rachel
+    - this is done
     - no longer symmetric
     - few popular nodes (lots of incoming edges)
 - keep track of delegation degrees for each voter (delegation_degrees) - rose

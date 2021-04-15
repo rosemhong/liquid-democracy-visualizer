@@ -24,7 +24,7 @@ class Node:
         # self.final_vote = None # if they delegated, what the final delegate votes
 
         self.weight_limit = model.weight_limit
-        self.num_followers = 0
+        self.current_weight = 1
 
         # parameters:
         self.threshold = self.model.threshold_diff  # how much more competent another voter needs to be
@@ -55,6 +55,13 @@ class Node:
 
         return v
 
+    def _find_root_weight(self, node):
+        if node.delegate:
+            return self._find_root_weight(node.delegate)
+        else:
+            return node.current_weight
+
+
     # Fills out self.eligible_delegates
     def _find_eligible_delegates(self, del_error=False):
         # TODO(?): wildcards: option to add error when determining who is a potential delegate 
@@ -65,9 +72,15 @@ class Node:
             prob = 1
         
         for neighbor in self.edges:
-            if neighbor.competence * prob > self.competence + self.threshold:
-                if neighbor.num_followers < neighbor.weight_limit:
+            if neighbor.competence > self.competence + self.threshold:
+                if self._find_root_weight(neighbor) + self.current_weight <= neighbor.weight_limit:
                     self.eligible_delegates.append(neighbor)
+
+    def _add_weight_to_chain(self, weight, node):
+        node.current_weight += 1
+        if node.delegate:
+            node._add_weight_to_chain(1, node.delegate)
+
 
     def assign_delegate(self, rule=DelegateRule.MOST_COMPETENT):
         '''
@@ -97,7 +110,7 @@ class Node:
         
         if chosen:
             self.delegate = chosen
-            chosen.num_followers += 1
+            self._add_weight_to_chain(1, chosen)
 
             # d.followers.append(self) # may get rid of or move to graph function
         else:

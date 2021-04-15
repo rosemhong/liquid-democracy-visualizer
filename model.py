@@ -17,24 +17,27 @@ class Model:
         delegation_degrees (int): limit of degrees of delegation
             degree 1 = I delegate to voter x unless they delegate to someone else
         '''
+        self.graph_type = self._to_int(model_args.get('graph_type'), ret_value=1)
         self.total_voters = self._to_int(model_args.get('total_voters'))
         self.competence_mean = self._to_float(model_args.get('competence_mean'))
         self.competence_sd = self._to_float(model_args.get('competence_sd'))
         self.connect_probability = self._to_float(model_args.get('connect_probability'))
         self.delegate_probability = self._to_float(model_args.get('delegate_probability'))
         self.threshold_diff = self._to_float(model_args.get('threshold_diff'))
-        self.weight_limit = self._to_int(model_args.get('weight_limit'))
-        self.delegation_degree = self._to_int(model_args.get('delegation_degree')) # TODO: make this a mean / sd thing instead of being the same for everyone?
+        self.weight_limit = self._to_int(model_args.get('weight_limit'), ret_value=float('inf'))
+        # TODO: make this a mean / sd thing instead of being the same for everyone?
+        self.delegation_degree = self._to_int(model_args.get(
+            'delegation_degree'), ret_value=float('inf'))
         # TODO: splitting vote among different delegates
     
-    def _to_int(self, arg):
-        if arg is not None:
+    def _to_int(self, arg, ret_value=None):
+        if arg is not None and arg != 'None':
             return int(arg)
         else:
-            return None
+            return ret_value
     
-    def _to_float(self, arg):
-        if arg is not None:
+    def _to_float(self, arg, ret_value=None):
+        if arg is not None and arg != 'None':
             return float(arg)
         else:
-            return None
+            return ret_value
