@@ -6,28 +6,10 @@ from graph import Graph
 from visualization import Visualization
 
 CONFIG = 'config.ini'
-NUM_TRIALS = 1
+NUM_TRIALS = 2
 
 '''
 TODO:
-for the next time we meet (after 4/11):
-- test the functions we each wrote last time!
-
-easy
-- compare to if no one delegates (tally up direct democracy vote)
-    - this is done in get_raw_results, just print it out in main at some point
-- print parameters in main
-
-medium
-- limit number of votes for a delegate (weight_limit parameter) - eric
-    - keep track of capacity
-    - in find_eligible_delegates, if neighbor at capacity (goin in order), skip them
-- preferential attachment graph (from Ariel's suggestion) - rachel
-    - this is done
-    - no longer symmetric
-    - few popular nodes (lots of incoming edges)
-- keep track of delegation degrees for each voter (delegation_degrees) - rose
-    - dist in all_paths, if dist > degree for a voter, just vote themselves
 
 hard
 - splitting vote among multiple delegates equally? (topo sort)
@@ -53,16 +35,20 @@ def main():
     accuracies = []
     num_correct = 0
 
+    dd_accuracies = []
+    dd_num_correct = 0
+
     # run multiple trials of election
     for i in range(NUM_TRIALS):
         graph = Graph(model)
+        
+        # get liquid democracy results
         results = graph.get_results()
-
         correct_votes = int(results[1])
         total_votes = graph.model.total_voters
 
-        # output results
-        print("Trial " + str(i) + ":")
+        # output liquid democracy results
+        print("Liquid democracy, trial " + str(i) + ":")
         print("  Correct / total votes: " +
               str(correct_votes) + "/" + str(total_votes))
 
@@ -72,6 +58,14 @@ def main():
             num_correct += 1
         print("  Accuracy: {:.3f}".format(accuracy))
 
+        # get direct democracy results
+        dd_results = graph.get_raw_results()
+        dd_correct_votes = int(dd_results[1])
+        dd_accuracy = dd_correct_votes / total_votes
+        dd_accuracies.append(dd_accuracy)
+        if dd_accuracy >= 0.5:
+            dd_num_correct += 1
+
     # visualize graph of last loop
     vis = Visualization(graph)
     vis.show()
@@ -79,10 +73,21 @@ def main():
     avg_accuracy = np.mean(accuracies)
     sd = np.std(accuracies)
     print()
-    print("Summary over {} trials:".format(NUM_TRIALS))
+    print("Model parameters")
+    print(model.__dict__)
+    print()
+    print("Liquid democracy results over {} trials:".format(NUM_TRIALS))
     print("  Average accuracy: {:.3f}".format(avg_accuracy))
     print("  SD: {:.3f}".format(sd))
     print("  {}/{} correct elections".format(num_correct, NUM_TRIALS))
+
+    dd_avg_accuracy = np.mean(dd_accuracies)
+    dd_sd = np.std(dd_accuracies)
+    print()
+    print("Direct democracy results over {} trials:".format(NUM_TRIALS))
+    print("  Average accuracy: {:.3f}".format(dd_avg_accuracy))
+    print("  SD: {:.3f}".format(dd_sd))
+    print("  {}/{} correct elections".format(dd_num_correct, NUM_TRIALS))
 
 if __name__ == '__main__':
     main()

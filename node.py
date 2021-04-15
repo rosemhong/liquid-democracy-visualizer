@@ -18,7 +18,6 @@ class Node:
         self.weight = 1  # strength of vote
         self.delegate = None  # which node this node has delegated to
         self.eligible_delegates = []  # possible nodes this node can delegate to
-        self.delegate_probability = self.model.delegate_probability
         self.delegation_degree = self.model.delegation_degree
         # self.followers = []  # nodes who have delegated to this node
         # self.final_vote = None # if they delegated, what the final delegate votes
@@ -63,14 +62,7 @@ class Node:
 
 
     # Fills out self.eligible_delegates
-    def _find_eligible_delegates(self, del_error=False):
-        # TODO(?): wildcards: option to add error when determining who is a potential delegate 
-        # (ie 0.8 * delegate competency)
-        if del_error:
-            prob = self.delegate_probability
-        else:
-            prob = 1
-        
+    def _find_eligible_delegates(self):
         for neighbor in self.edges:
             if neighbor.competence > self.competence + self.threshold:
                 if self._find_root_weight(neighbor) + self.current_weight <= neighbor.weight_limit:

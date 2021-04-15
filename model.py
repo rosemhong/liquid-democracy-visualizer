@@ -22,7 +22,6 @@ class Model:
         self.competence_mean = self._to_float(model_args.get('competence_mean'))
         self.competence_sd = self._to_float(model_args.get('competence_sd'))
         self.connect_probability = self._to_float(model_args.get('connect_probability'))
-        self.delegate_probability = self._to_float(model_args.get('delegate_probability'))
         self.threshold_diff = self._to_float(model_args.get('threshold_diff'))
         self.weight_limit = self._to_int(model_args.get('weight_limit'), ret_value=float('inf'))
         # TODO: make this a mean / sd thing instead of being the same for everyone?
