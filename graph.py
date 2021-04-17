@@ -212,3 +212,18 @@ class Graph:
             candidate = path[0][0].vote  # all votes in this path go towards `candidate`
             results[candidate] += num_votes
         return results
+
+    def get_longest_path_len(self):
+        longest_path_len = 0
+        for path in self.all_paths:
+            longest_path_len = max(longest_path_len, len(path))
+        return longest_path_len
+
+    def get_avg_path_len_and_sd(self):
+        path_lens = []
+        for path in self.all_paths:
+            path_lens.append(len(path))
+        return np.mean(path_lens), np.std(path_lens)
+    
+    def get_num_paths(self):
+        return len(self.all_paths)

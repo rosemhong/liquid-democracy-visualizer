@@ -6,7 +6,7 @@ from graph import Graph
 from visualization import Visualization
 
 CONFIG = 'config.ini'
-NUM_TRIALS = 2
+NUM_TRIALS = 5
 
 '''
 TODO:
@@ -16,6 +16,17 @@ hard
 
 later
 - run simulations by varying a parameter and holding rest constant
+    - look at average accuracy + correct elections
+        - compare to direct democracy
+
+    - simple ones (ignore weight limit + delegation degree)
+        - varying total voters
+        - varying competence mean and sd
+        - varying connect probability for graph type 1
+        - varying threshold diff
+
+
+
 - graph results
 - improve visualization (ie add distance from root, gradient, show accuracy)
 - presentation
@@ -37,6 +48,11 @@ def main():
 
     dd_accuracies = []
     dd_num_correct = 0
+
+    num_paths = []
+    path_lengths = []
+    path_sds = []
+    max_path_lengths = []
 
     # run multiple trials of election
     for i in range(NUM_TRIALS):
@@ -65,11 +81,19 @@ def main():
         dd_accuracies.append(dd_accuracy)
         if dd_accuracy >= 0.5:
             dd_num_correct += 1
+        
+        # get path stats
+        num_paths.append(graph.get_num_paths())
+        path_lengths.append(graph.get_avg_path_len_and_sd()[0])
+        path_sds.append(graph.get_avg_path_len_and_sd()[1])
+        max_path_lengths.append(graph.get_longest_path_len())
+
 
     # visualize graph of last loop
     vis = Visualization(graph)
     vis.show()
 
+    # print trial results
     avg_accuracy = np.mean(accuracies)
     sd = np.std(accuracies)
     print()
@@ -80,6 +104,22 @@ def main():
     print("  Average accuracy: {:.3f}".format(avg_accuracy))
     print("  SD: {:.3f}".format(sd))
     print("  {}/{} correct elections".format(num_correct, NUM_TRIALS))
+
+    avg_num_path = np.mean(num_paths)
+    num_path_sd = np.std(num_paths)
+
+    avg_path_length = np.mean(path_lengths)
+    path_length_sd = np.std(path_lengths)
+
+    avg_longest_path_length = np.mean(max_path_lengths)
+    longest_path_length_sd = np.std(max_path_lengths)
+
+    print("  Average number of paths: {:.3f}".format(avg_num_path))
+    print("  SD: {:.3f}".format(num_path_sd))
+    print("  Average path length: {:.3f}".format(avg_path_length))
+    print("  SD: {:.3f}".format(path_length_sd))
+    print("  Average longest path length: {:.3f}".format(avg_longest_path_length))
+    print("  SD: {:.3f}".format(longest_path_length_sd))
 
     dd_avg_accuracy = np.mean(dd_accuracies)
     dd_sd = np.std(dd_accuracies)
