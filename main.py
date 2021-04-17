@@ -6,7 +6,7 @@ from graph import Graph
 from visualization import Visualization
 
 CONFIG = 'config.ini'
-NUM_TRIALS = 5
+NUM_TRIALS = 10
 
 '''
 TODO:
@@ -51,8 +51,9 @@ def main():
 
     num_paths = []
     path_lengths = []
-    path_sds = []
+    path_sds = [] # we don't print this rn
     max_path_lengths = []
+    max_sep_degrees = []
 
     # run multiple trials of election
     for i in range(NUM_TRIALS):
@@ -87,6 +88,7 @@ def main():
         path_lengths.append(graph.get_avg_path_len_and_sd()[0])
         path_sds.append(graph.get_avg_path_len_and_sd()[1])
         max_path_lengths.append(graph.get_longest_path_len())
+        max_sep_degrees.append(graph.get_longest_dist_from_root())
 
 
     # visualize graph of last loop
@@ -114,12 +116,17 @@ def main():
     avg_longest_path_length = np.mean(max_path_lengths)
     longest_path_length_sd = np.std(max_path_lengths)
 
+    avg_max_sep_degree = np.mean(max_sep_degrees)
+    max_sep_degree_sd = np.std(max_sep_degrees)
+
     print("  Average number of paths: {:.3f}".format(avg_num_path))
     print("  SD: {:.3f}".format(num_path_sd))
     print("  Average path length: {:.3f}".format(avg_path_length))
     print("  SD: {:.3f}".format(path_length_sd))
     print("  Average longest path length: {:.3f}".format(avg_longest_path_length))
     print("  SD: {:.3f}".format(longest_path_length_sd))
+    print("  Average max separation degree: {:.3f}".format(avg_max_sep_degree))
+    print("  SD: {:.3f}".format(max_sep_degree_sd))
 
     dd_avg_accuracy = np.mean(dd_accuracies)
     dd_sd = np.std(dd_accuracies)
@@ -141,6 +148,8 @@ def main():
     print(path_length_sd)
     print(avg_longest_path_length)
     print(longest_path_length_sd)
+    print(avg_max_sep_degree)
+    print(max_sep_degree_sd)
     print(dd_avg_accuracy)
     print(dd_sd)
     print(dd_num_correct)

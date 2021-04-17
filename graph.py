@@ -224,6 +224,13 @@ class Graph:
         for path in self.all_paths:
             path_lens.append(len(path))
         return np.mean(path_lens), np.std(path_lens)
+
+    def get_longest_dist_from_root(self):
+        longest_dist = 0
+        for path in self.all_paths:
+            for _, dist in path:
+                longest_dist = max(longest_dist, dist)
+        return longest_dist
     
     def get_num_paths(self):
         return len(self.all_paths)
