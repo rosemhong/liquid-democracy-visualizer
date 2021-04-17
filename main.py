@@ -96,7 +96,7 @@ def main():
     # print trial results
     avg_accuracy = np.mean(accuracies)
     sd = np.std(accuracies)
-    print()
+    print("------------------------------------------------------")
     print("Model parameters")
     print(model.__dict__)
     print()
