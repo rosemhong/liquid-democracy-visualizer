@@ -129,5 +129,21 @@ def main():
     print("  SD: {:.3f}".format(dd_sd))
     print("  {}/{} correct elections".format(dd_num_correct, NUM_TRIALS))
 
+    # output for CSV
+    print()
+    print("--------------------------------------FOR CSV--------------------------------------")
+    print(avg_accuracy)
+    print(sd)
+    print(num_correct)
+    print(avg_num_path)
+    print(num_path_sd)
+    print(avg_path_length)
+    print(path_length_sd)
+    print(avg_longest_path_length)
+    print(longest_path_length_sd)
+    print(dd_avg_accuracy)
+    print(dd_sd)
+    print(dd_num_correct)
+
 if __name__ == '__main__':
     main()
