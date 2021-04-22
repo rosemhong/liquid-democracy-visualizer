@@ -22,6 +22,8 @@ class Node:
         # self.followers = []  # nodes who have delegated to this node
         # self.final_vote = None # if they delegated, what the final delegate votes
 
+        self.delegation_rule = DelegateRule(self.model.delegation_rule)
+
         self.weight_limit = model.weight_limit
         self.current_weight = 1
 
@@ -73,14 +75,15 @@ class Node:
         if node.delegate:
             node._add_weight_to_chain(1, node.delegate)
 
-
-    def assign_delegate(self, rule=DelegateRule.MOST_COMPETENT):
+    def assign_delegate(self):
         '''
         delegate vote based on self.eligible_delegates and any delegation rules
         rules could be: pick randomly, pick most competent, set default for now
 
         if self.eligible_delegates is empty, make weight 0
         '''
+
+        rule = self.delegation_rule
 
         self._find_eligible_delegates()
         chosen = None
@@ -96,7 +99,7 @@ class Node:
             length = len(self.eligible_delegates)
             if length:
                 i = np.random.randint(0,length)
-                self.delegate = self.eligible_delegates[i]
+                chosen = self.eligible_delegates[i]
         else:
             raise NotImplemented()
         

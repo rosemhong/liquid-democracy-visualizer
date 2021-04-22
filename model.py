@@ -18,6 +18,7 @@ class Model:
             degree 1 = I delegate to voter x unless they delegate to someone else
         '''
         self.graph_type = self._to_int(model_args.get('graph_type'), ret_value=1)
+        self.delegation_rule = self._to_int(model_args.get('delegation_rule'), ret_value=1)
         self.total_voters = self._to_int(model_args.get('total_voters'))
         self.competence_mean = self._to_float(model_args.get('competence_mean'))
         self.competence_sd = self._to_float(model_args.get('competence_sd'))
