@@ -74,11 +74,12 @@ class Graph:
         return { i for _, i in sorted(mapped_weights)[:m] }
 
     def _generate_preferential_attachment_graph(self, n, m):
-        # using barabasi-albert model
-        # https://stackoverflow.com/questions/59003405/barab%C3%A1si-albert-model-in-python
-        # n = number of nodes in final graph
-        # m = initial number of nodes that are fully connected / 'popular'
-
+        '''
+        using barabasi-albert model
+        https://stackoverflow.com/questions/59003405/barab%C3%A1si-albert-model-in-python
+        n = number of nodes in final graph
+        m = initial number of nodes that are fully connected / 'popular'
+        '''
 
         # initialise with a complete graph on m vertices
         neighbors = [ set(range(m)) - {i} for i in range(m) ]
