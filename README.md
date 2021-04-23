@@ -1,1 +1,1 @@
-# Liquid Democracy Visualizer
+# Liquid Democra:eye: Visualizer
