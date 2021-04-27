@@ -1,1 +1,1 @@
-# cs238-project
+# Liquid Democracy Visualizer

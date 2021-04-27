@@ -71,9 +71,9 @@ class Node:
                     self.eligible_delegates.append(neighbor)
 
     def _add_weight_to_chain(self, weight, node):
-        node.current_weight += 1
+        node.current_weight += weight
         if node.delegate:
-            node._add_weight_to_chain(1, node.delegate)
+            node._add_weight_to_chain(self.current_weight, node.delegate)
 
     def assign_delegate(self):
         '''
@@ -104,6 +104,6 @@ class Node:
         
         if chosen:
             self.delegate = chosen
-            self._add_weight_to_chain(1, chosen)
+            self._add_weight_to_chain(self.current_weight, chosen)
         else:
             self.delegate = None
