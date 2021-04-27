@@ -4,9 +4,9 @@ import os
 from model import Model
 from graph import Graph
 
-
 LIGHT_GREEN = '#8ee58b'
 LIGHT_RED = '#ffbcbc'
+
 
 class Visualization:
     def __init__(self, graph=None):
@@ -15,7 +15,7 @@ class Visualization:
 
     def show(self, size=10, weight=5):
         G = nx.DiGraph()
-        node_colors = {} # node: color string
+        node_colors = {}  # node: color string
         
         # set colors
         for path in self.all_paths:
@@ -36,7 +36,6 @@ class Visualization:
         # add nodes
         for node in self.graph.nodes:
             title = 'Competence: %.2f' % node.competence
-            # TODO if time: add more info to title (e.g. distance to final delegate in path)
             G.add_node(node.name, size=size, title=title, color=node_colors[node])
 
         # add edges
@@ -46,7 +45,6 @@ class Visualization:
             else:
                 pass
 
-
         # populates the nodes and edges data structures
         nt = Network('500px', '500px', directed=True)
         # nt.show_buttons()
@@ -54,21 +52,3 @@ class Visualization:
         if os.path.exists("nx.html"):
             os.remove("nx.html")
         nt.show('nx.html')
-
-
-# testing:
-# model = Model({
-#     'total_voters': 25,
-#     'competence_mean': 0.5,
-#     'competence_sd': 0.2,
-#     'connect_probability': 0.3,
-#     'delegate_probability': 0,
-#     'threshold_diff': 0.1,
-#     'weight_limit': 0,
-#     'delegation_degrees': 0
-# })
-
-# graph = Graph(model)
-# results = graph.get_results()
-# v = Visualization(graph)
-# v.show()

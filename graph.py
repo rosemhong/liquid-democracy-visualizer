@@ -34,15 +34,14 @@ class Graph:
 
     def generate_graph(self, graph_type=GraphType.PREFERENTIAL_ATTACHMENT):
         '''
-        Generates Erdos-Renyi random graph.
-        TODO: generate preferential attachment graph
+        Generates random Erdos-Renyi or preferential attachment graph.
         '''
         if graph_type == GraphType.ERDOS_RENYI:
             adj_matrix = self._generate_erdos_renyi_graph()
         elif graph_type == GraphType.PREFERENTIAL_ATTACHMENT:
             num_nodes = len(self.nodes)
             adj_matrix = self._generate_preferential_attachment_graph(num_nodes, int(num_nodes//5))
-        else:
+        else:  # placeholder for other graph types
             raise NotImplemented()
 
         return adj_matrix
@@ -75,29 +74,30 @@ class Graph:
 
     def _generate_preferential_attachment_graph(self, n, m):
         '''
-        using barabasi-albert model
-        https://stackoverflow.com/questions/59003405/barab%C3%A1si-albert-model-in-python
+        Using barabasi-albert model from
+        https://stackoverflow.com/questions/59003405/barab%C3%A1si-albert-model-in-python.
+
         n = number of nodes in final graph
-        m = initial number of nodes that are fully connected / 'popular'
+        m = initial number of nodes that are fully connected / "popular"
         '''
 
-        # initialise with a complete graph on m vertices
+        # initialize with a complete graph on m vertices
         neighbors = [ set(range(m)) - {i} for i in range(m) ]
         degrees = [ m-1 for i in range(m) ]
 
         for i in range(m, n):
             n_neighbors = self._random_subset_with_weights(degrees, m)
 
-            # add node with back-edges
+            # add node with back edges
             neighbors.append(n_neighbors)
             degrees.append(m)
 
-            # add forward-edges
+            # add forward edges
             for j in n_neighbors:
                 neighbors[j].add(i)
                 degrees[j] += 1
 
-        # turn in this into adj matrix
+        # turn this into an adjacency matrix
         for line in neighbors:
             print(line)
 
@@ -154,7 +154,8 @@ class Graph:
     def _construct_all_paths(self):
         nodes = self.nodes
 
-        # construct reverse graph of who points to who; also find sources of the reverse graph (nodes that don't delegate their vote)
+        # construct reverse graph of who points to who;
+        # also find sources of the reverse graph (nodes that don't delegate their vote)
         rev_delegate_adj_matrix = [[0 for _ in range(len(nodes))] for _ in range(len(nodes))]
         sources = []
         for node in nodes:
@@ -164,13 +165,6 @@ class Graph:
                 rev_delegate_adj_matrix[j][i] = 1
             else:
                 sources.append(node)
-
-        # print('REV DELEGATE ADJ MATRIX')
-        # print(rev_delegate_adj_matrix)
-
-        # print('SOURCES')
-        # for source in sources:
-        #     print(source)
 
         # BFS from sources
         self.all_paths = []

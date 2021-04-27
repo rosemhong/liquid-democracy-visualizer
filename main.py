@@ -8,30 +8,6 @@ from visualization import Visualization
 CONFIG = 'config.ini'
 NUM_TRIALS = 10
 
-'''
-TODO:
-
-hard
-- splitting vote among multiple delegates equally? (topo sort)
-
-later
-- run simulations by varying a parameter and holding rest constant
-    - look at average accuracy + correct elections
-        - compare to direct democracy
-
-    - simple ones (ignore weight limit + delegation degree)
-        - varying total voters
-        - varying competence mean and sd
-        - varying connect probability for graph type 1
-        - varying threshold diff
-
-
-
-- graph results
-- improve visualization (ie add distance from root, gradient, show accuracy)
-- presentation
-- write report
-'''
 
 def main():
     # read model args from config file
@@ -51,7 +27,7 @@ def main():
 
     num_paths = []
     path_lengths = []
-    path_sds = [] # we don't print this rn
+    path_sds = []
     max_path_lengths = []
     max_sep_degrees = []
 

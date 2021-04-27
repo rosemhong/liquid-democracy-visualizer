@@ -1,6 +1,7 @@
 from graph import Graph, GraphType
 from model import Model
 
+
 model = Model({
     'total_voters': 25,
     'competence_mean': 0.5,
