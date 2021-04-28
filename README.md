@@ -7,4 +7,4 @@ To run the code:
 3. An `nx.html` file should be generated. Open the file in browser to view the `pyvis` visualization of the election. The visualization is dynamic: zoom in/out, move groups of nodes around, and hover over nodes to view their competence.
 4. Various statistics (including average accuracy, etc.) should also be outputted in terminal.
 
-![Graph Types](/images/graph_types)
+![Graph Types](/images/graph_types.png)
