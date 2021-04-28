@@ -74,7 +74,7 @@ class Graph:
 
     def _generate_preferential_attachment_graph(self, n, m):
         '''
-        Using barabasi-albert model from
+        Using Barabasi-Albert model from
         https://stackoverflow.com/questions/59003405/barab%C3%A1si-albert-model-in-python.
 
         n = number of nodes in final graph
