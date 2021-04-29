@@ -10,8 +10,8 @@
 ### Sample visualizations
 
 From left to right:
-- graph_type = 1, delegation_rule = 1
-- graph_type = 1, delegation_rule = 2
-- graph_type = 2, delegation_rule = 1
+- `graph_type = 1`, `delegation_rule = 1`
+- `graph_type = 1`, `delegation_rule = 2`
+- `graph_type = 2`, `delegation_rule = 1`
 
 ![Graph Types](/images/graph_types.png)
